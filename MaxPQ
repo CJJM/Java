@@ -1,0 +1,7 @@
+public interface MaxPQ<Key extends Comparable<Key>> {
+    public Key delMax();
+    public void insert(Key key);
+    public boolean isEmpty();
+    public int size();
+    public String toString();
+}
