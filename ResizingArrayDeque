@@ -1,0 +1,100 @@
+//file: ResizingArrayDeque.java
+//author: Connor Maloney
+//date: 2/10/2014
+//
+//  This program implements the Deque array using a resizing array
+
+public class ResizingArrayDeque<T> implements Deque<T> 
+{
+
+    private T[] d = (T[])new Object[1];
+    private int N = 0;
+    
+    
+    public int size() {return N;}
+    
+    public boolean isEmpty() {return N == 0;}
+    
+     private void resize(int max) 
+     {
+         assert max >= N;
+         T[] temp = (T[]) new Object[max];
+         for (int i = 0; i < N; i++) 
+         {
+             temp[i] = d[(0 + i) % d.length];
+         }
+         d = temp;
+     }
+ 
+     public String toString() 
+     {
+         StringBuilder sb = new StringBuilder("The Deque has " + d.length + " spaces in it" );
+         return sb.toString();    
+     }
+     
+      public void pushRight(T t)
+      {
+          if(N == d.length)
+              resize(2*N);
+          d[N++] = t;
+      }
+     
+     
+      public T popLeft()
+      {
+          T t = d[0];
+          for(int i=1; i<N-1; i++){d[i-1] = d[i];}
+          
+          d[--N] = null;
+          if(N > 0 && N == d.length/4){resize(d.length/2);}
+          
+          return t;
+      }
+     
+     
+      public void pushLeft(T t)
+      {   
+          if(N == d.length)
+              resize(2*N);
+          for(int i=N-1; i>0; i--)
+          {
+              d[i+1] = d[i];
+          }
+          d[0] = t;
+          N++;
+      }
+
+      public T popRight()
+      {
+          T t = d[--N];
+          d[N] = null;
+          if(N > 0 && N == d.length/4)
+          {
+              resize(d.length/2);
+          }   
+          return t;
+      }
+
+      public static void main(String[] args) 
+      {
+          Deque<String> d = new ResizingArrayDeque<String>();
+          String a = "Boston";
+          String c = "College";
+       
+          System.out.println(d.isEmpty());
+          d.pushLeft(c);
+          d.pushRight(c);
+          d.pushLeft(c);
+          d.pushRight(a);       
+          d.pushRight(a);
+          d.pushRight(a);          
+          System.out.println(d.isEmpty());
+          System.out.println(d.popRight()); 
+          System.out.println(d.popLeft());
+          System.out.println(d.toString());  
+          System.out.println(d.popLeft());
+          System.out.println(d.popRight());
+          System.out.println(d.popRight());                      
+          System.out.println(d.popRight());            
+      }
+}
