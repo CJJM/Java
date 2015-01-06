@@ -1,0 +1,190 @@
+//file: RedBlackC.java
+//author: Connor Maloney
+//date: 4/13/14
+//
+//  Red Black tree program
+
+public class RedBlackC<Key extends Comparable<Key>, Value> implements RedBlack<Key, Value>{
+    
+    private int N;
+    private RedBlackC<Key, Value> root;
+    
+    private static final boolean RED = false;
+    private static final boolean BLACK = true;
+    
+    private Key key;
+    private Value data;
+    
+    private RedBlackC<Key, Value> left;
+    private RedBlackC<Key, Value> right;
+    private RedBlackC<Key, Value> a;
+    private boolean color;
+    
+    public RedBlackC (Key key, Value data, RedBlackC<Key, Value> left, RedBlackC<Key, Value> right, boolean color)
+    {    
+        this.key = key;
+        this.data = data;
+        this.left = left;
+        this.right = right;
+        this.color = color;
+        this.N = 0;
+        this.root = null;
+        this.a = null;
+       
+    }
+    
+    public boolean isEmpty() 
+        {return this.N == 0;}
+    
+    
+    public boolean redTest(RedBlackC<Key, Value> redblack)
+    {    
+        if (redblack == null)
+            {return false;}   
+        else
+            {return redblack.color == RED;}
+    }
+            
+    
+    public boolean blackTest(RedBlackC<Key, Value> redblack)
+        {return redblack.color == true;}
+    
+    public boolean contains(Key key)
+    {    
+        if(get(key) == null) 
+            {return false;}
+        else 
+            {return true;}
+    }
+  
+        
+    public Value get (Key key) 
+    {    
+        if (root == null) 
+            {return null;}
+        if (root.key == key)
+            {return root.data;}
+        else if (key.compareTo(root.key) == -1)
+            {return root.left.get(key);}
+        else if (key.compareTo(root.key) == 1)
+            {return root.right.get(key);}
+        else 
+            {return null;}
+    }
+
+    public void put1(RedBlackC<Key, Value> a, Key key, Value val)
+    {
+        a.key = key;
+        a.data = val;
+    }
+    
+    public void checkTree(RedBlackC<Key, Value> c, Key a, Value val)
+    {
+        if (c.key == null)
+        {
+            c.key = a;
+            c.data = val;
+        }
+        
+        else
+        {
+            if ((a.compareTo(c.key) == -1) && (c.left.key != null))
+                {checkTree(c.left, a, val);}
+            if ((a.compareTo(c.key) > -1) && (c.right.key != null))
+                {checkTree(c.right, a, val);}
+            else
+                return;
+        }
+    }    
+    
+    
+    
+    
+    
+    public RedBlackC<Key, Value> put (Key key, Value val)
+    {
+        if(N == 0)
+        {
+            root = new RedBlackC<Key, Value> (key, val, new RedBlackC<Key,Value> (null, null, null, null, BLACK), new RedBlackC<Key, Value> (null, null, null, null, BLACK), RED);
+            N++;
+            return root;
+        }
+        
+        if(N > 0)
+        {    
+            RedBlackC<Key, Value> previous = root;
+            root = new RedBlackC<Key, Value> (previous.key, previous.data, previous.left, previous.right, BLACK);
+            checkTree(root, key, val);
+            distribute(root);
+            N++;
+            return root;
+        }
+        else
+            {return null;}
+    }
+    
+    public int size()
+        {return this.N;}
+    
+    
+    
+
+   
+    public void distribute(RedBlackC<Key, Value> redblack)
+    { 
+        if ((redTest(redblack.right) && redTest(redblack.right.right)) || (redTest(redblack.right) & !redTest(redblack.left)))
+            {redblack = rotateL(redblack);}
+        if (redTest(redblack.left) && redTest(redblack.left.left))
+            {redblack = rotateR(redblack);}
+        if (redTest(redblack.left) && redTest(redblack.right))
+            {redblack. colorChange(redblack);}
+        else 
+            {redblack = redblack;}
+    }
+
+    
+    private RedBlackC<Key, Value> rotateR(RedBlackC<Key, Value> h)
+    {
+        RedBlackC<Key, Value> a = h.left;
+        h.left = a.right;
+        a.right = h;
+        a.color = a.right.color;
+        a.right.color = RED;
+        
+        return a;
+    }
+    
+    private RedBlackC<Key, Value> rotateL(RedBlackC<Key, Value> h)
+    {
+        RedBlackC<Key, Value> a = h.right;
+        h.right = a.left;
+        a.left = h;
+        a.color = a.left.color;
+        a.left.color = RED;
+
+        return a;
+    }
+    
+    private RedBlackC<Key, Value> colorChange(RedBlackC<Key, Value> h) 
+    {
+        h.color = !h.color;
+        h.left.color = !h.left.color;
+        h.right.color = !h.right.color;
+        return h;
+    }
+   
+    public static void main(String[] args)
+    {
+        RedBlackC a = new RedBlackC(null, null, null, null, BLACK);
+        
+        a.put(100, "ONE");
+        a.put(200, "TWO");
+        a.put(300, "THREE");
+        a.put(400, "FOUR");
+        a.put(500, "FIVE");
+        a.put(600, "SIX");
+        
+        
+        System.out.println(a.get(100));
+    }
+}
