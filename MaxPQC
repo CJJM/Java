@@ -1,0 +1,192 @@
+//file: MaxPQC.java
+//author: Connor Maloney
+//date: 3/16/2014
+//
+//  This program uses a binary heap to print out input using a triply-linked data structures
+
+public class MaxPQC<T extends Comparable<T>> implements MaxPQ<T>
+{   
+    private int N;   
+    private Node top;
+   
+    
+private class Node
+{                               
+  private T info;                        
+  private Node left;            
+  private Node right; 
+  private Node parent;
+  
+  private Node(T info)
+  {
+      this.info = info;
+      this.left = null;
+      this.right = null;
+      this.parent = null;
+  }
+  public T getInfo(){return this.info;}
+}
+
+public MaxPQC()
+{
+        this.N = 0;
+        this.top = null;
+}
+
+public T delMax()
+{
+    if (this.isEmpty())
+        throw new RuntimeException("Empty");
+    if (this.N == 1)
+    {
+        N--;
+        return this.top.info;
+    }
+    if (this.N > 1)
+    {
+        T r = this.top.info;
+        Node g = readPath(swap(pathTo(N)), this.top);
+        T y = g.getInfo();
+        this.top.info = y;
+        g = null;
+        sink(this.top);
+        N--;
+        return r;}
+        else 
+        {throw new RuntimeException("wrong");}
+}
+
+public void insert(T key)
+{    
+    if (this.isEmpty())
+    {
+        Node temp = new Node(key);
+        this.top = temp;
+        N++;
+    }
+    else 
+    {   
+        Node u = readPath(swap(pathTo(N+1)), this.top);
+        u = new Node(key);
+          
+        if (N % 2 == 0)
+        {
+            this.top.right = u;
+            u.parent = this.top;
+        }
+        if (N%2 == 1)
+        {
+            this.top.left = u;
+            u.parent = this.top;
+        }
+        
+        swim(u);
+        this.N++;
+    }
+}
+    
+private void sink(Node key)
+{
+    int y = 0;
+    T x = key.right.info;
+    if (x == null)
+        {y = -1;}
+    else
+    {y = (key.right.info.compareTo(key.left.info));}
+    
+    int z = key.info.compareTo(this.top.left.info);
+    int u = key.info.compareTo(this.top.right.info);    
+    while (y == -1)
+    { 
+        if (z == -1)
+            exch(key.info, this.top.left.info);
+    }
+    
+    while(y > -1) 
+    {
+        if (u == -1)
+            exch(key.info, this.top.right.info);
+    }
+    
+}
+    
+private void swim(Node key)
+{
+    int r = 0;
+    T x = key.parent.info;
+    if (x == null)
+    {r = 1;}
+    else
+        r = key.info.compareTo(key.parent.info);
+   if (r == 1)
+   {         
+            if (N%2 == 0)
+                exch(key.parent, key);
+            else
+            {
+                exch(key.parent, key);
+            }
+   }
+}
+
+private void exch(Object u, Object r)
+{
+       Object c = u;
+       u = r;
+       r = c;
+}
+
+public boolean isEmpty(){return this.N == 0;}
+public int size(){return this.N;}
+public String toString(){ return "";}
+
+public Node readPath(String a, Node c)
+{
+    if (a.equals(""))
+    return c;
+    if (a.charAt(0) =='0'){
+        return readPath(a.substring(1), c.left);}
+    else{
+         return readPath(a.substring(1), c.right);}   
+}
+     
+
+private String pathTo(int u)
+{
+    if (u <=1)
+    {return "";}
+    if (u > 1)
+    {
+        if (u%2 == 1)
+            return "1" + pathTo(u/2);
+        if (u % 2 == 0)
+            return "0" + pathTo(u/2);
+        else
+            return "";
+    }
+    else
+        {return "";}
+}
+
+public static String swap (String names)
+{
+      String p = " ";
+      for (int i=names.length()-1; i>0; i--)
+      {
+        p += names.charAt(i);   
+      }
+      return p;
+}
+
+public static void main (String args[])
+{
+    MaxPQ<String> u = new MaxPQC<String>();
+    u.insert("A");
+    u.insert("B");
+    u.insert("C");
+
+System.out.println(u.delMax());
+System.out.println(u.delMax());
+
+}
+}
