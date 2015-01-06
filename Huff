@@ -1,0 +1,167 @@
+//Author: Andrew Donofrio and Connor Maloney
+//Date: 3/26/14
+//Huff.java - zips text file
+//
+//Run this program through the interactions window. "run Huff filename.txt"
+
+import java.util.*;
+import java.io.*;
+import java.lang.*;
+
+ 
+class Node {
+ 
+    public char characters;
+    public int frequency;
+    public Node left, right;
+
+    public Node(char c, int f) {
+        characters = c;
+        frequency = f;
+    }
+ 
+    public Node() {
+    }
+ 
+class CompareFrequency implements Comparator<Node> {
+ 
+    public int compare(Node x, Node y) { //compares two nodes, returns difference between the two
+        int freqOne = x.frequency; 
+        int freqTwo = y.frequency;
+ 
+        return freqOne-freqTwo;
+    }
+}
+
+public class Huff {  
+ 
+    public static PriorityQueue<Node> pq;
+    public static HashMap<Character, String> compressionMove;
+ 
+    public static void main(String[] args) throws IOException {
+        
+//      Read file
+//      File myFile = new File(args[0]);
+//      FileReader reader = new FileReader(myFile);
+        FileIOC savedFile = new FileIOC();
+        FileReader contentsOutput = savedFile.openInputFile(args[0]);
+        
+        Map<Character, Integer> hashmap = new HashMap<Character, Integer>();
+        String inputtext = ""; //input file text
+        
+        
+        //counts frequency of each character
+        while(true) {
+            int inputfile = contentsOutput.read();
+            if(inputfile == -1)
+                break;
+            char current = (char) inputfile;
+            inputtext = inputtext + current;
+            if(hashmap.containsKey(current)) 
+                hashmap.put(current, hashmap.get(current) + 1);
+            else{
+                hashmap.put(current, 1);
+            }
+        }
+ 
+        // Add nodes to PQ
+        pq = new PriorityQueue<Node>(200, new CompareFrequency()); //uses PriorityQueue<> - 200 signifies the number of spots for unique characters. 200 is a very generous number
+        int size = 0;
+        for(Character char1 : hashmap.keySet()) {
+            pq.add(new Node(char1, hashmap.get(char1))); //now it's on the priority queue
+            size++; //increments the size by 1 to continue the for loop
+        }
+ 
+        // Root of Tree
+        Node root = makeTree(size);
+        // Prints out what is input and its length
+        System.out.println("");
+        System.out.println("The original text is: ");
+        System.out.println(inputtext);
+        System.out.println("Original text is " + inputtext.length()*8 + " bits");
+        //Frequency Chart 
+        System.out.println("");
+        System.out.println("Frequency of each character: ");
+        System.out.println(hashmap);
+        //Symbol Table - representation of each letter (most frequently used letters should have the shortest representation)
+        System.out.println("The Symbol Table: ");
+        buildTable(root);
+        String compressed = compress(inputtext);       
+        //Binary output - shows the compressed text - should be put into the zip file 
+        System.out.println("");
+        System.out.println("The compressed text is: ");
+        System.out.println(compressed);
+        //System.out.println("Bit Converted (2nd) :" + toBinaryString(compressed));
+        System.out.println("The compressed text is " + compressed.length() + " bits");       
+        //Metrics on the compressed text - added to describe the change from the original text
+        System.out.println("");
+        System.out.println("The difference in bits between compressed output and original text is " + ((inputtext.length()*8)-compressed.length()) + " bits");
+        System.out.println("That is an overall size change of " + ((compressed.length() - ((inputtext.length()*8)-compressed.length()) + "%")));
+        
+                           
+        savedFile.openBinaryOutputFile();
+//        binaryOutFileName("mississippi.txt", "mississippi.zip");
+//        binaryOut(binaryOutFileName);
+//        contentsOutput.write(compressed.getBytes());  //ERROR IS HERE
+        BinaryOut binaryout = savedFile.openBinaryOutputFile();
+        binaryout.write(compressed); //SHOULD write the compressed string to the newly created zip file (mississippi.txt > mississippi.zip in test case)
+    }
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    // Goes through tree - traverseTree - assigns 0s and 1s to alternating branches
+    public static void traverseTree(Node node1, String string1) {
+        if(node1 == null) //node isnt leaf
+            return;
+        traverseTree(node1.left, string1+"0"); //node is left leaf so add a 0
+        traverseTree(node1.right, string1+"1"); //node is right leaf so add a 1
+        //The 0s and 1s pattern describe the path created to the leaves which translate to the representations of characters in the symbol table
+ 
+        //Assigns the values to the characters
+        if(node1.characters != '\0') { 
+            System.out.println("'" + node1.characters + "' : " + string1); //prints the values for each number
+            compressionMove.put(node1.characters, string1);
+        }
+    }
+ 
+    //Tree with least common characters as left children
+    public static Node makeTree(int length) {
+        Node one, two; //initialize the nodes
+        for(int i = 1; i <= length-1; i++) {
+            //creates new node in tree
+            Node three = new Node(); 
+            //poll returns head of queue 
+            three.left = one = pq.poll();
+            //poll returns head of queue 
+            three.right = two = pq.poll();
+            //new node is the sum of the other two
+            three.frequency = one.frequency + two.frequency;
+            pq.add(three);
+        }
+        return pq.poll();
+    }
+ 
+    // Compression table 
+    public static void buildTable(Node root) {
+        compressionMove = new HashMap<Character, String>();
+        traverseTree(root, new String());
+    }
+
+    // Compression - creates string of 0s and 1s
+    public static String compress(String string2) {
+        String string3 = new String();
+        for(int i = 0; i < string2.length(); i++)
+            string3 = string3 + compressionMove.get(string2.charAt(i));
+        return string3;
+    }
+}
+}
+
